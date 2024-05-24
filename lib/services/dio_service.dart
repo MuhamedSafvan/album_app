@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:album_app/providers/app_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/urls.dart';
 
@@ -77,69 +80,80 @@ class DioService {
 
   Future getUserData(context) async {
     final state = Provider.of<AppProvider>(context, listen: false);
-    // dio.options.headers['Authorization'] = 'Bearer ${state.userModel.access}';
+    final sharedPref = await SharedPreferences.getInstance();
+    final userResponse = sharedPref.getString('activeUser');
     dio.options.headers['content-Type'] = 'application/json';
-    // final isCached = await apiCacheManager.isAPICacheKeyExist(userCache);
-    // if (isCached) {
-    //   return dio.get(Urls.profileUrl, queryParameters: {'id': 1});
-    // } else {}
-    final response = await dio.get(Urls.profileUrl, queryParameters: {'id': 1});
-    state.getUserData(response.data);
+    if (userResponse != null) {
+      state.getUserData(jsonDecode(userResponse));
+    } else {
+      final response =
+          await dio.get(Urls.profileUrl, queryParameters: {'id': 1});
+      sharedPref.setString('activeUser', jsonEncode(response.data));
+      state.getUserData(response.data);
+    }
   }
 
   Future getAlbums(context) async {
     final state = Provider.of<AppProvider>(context, listen: false);
-    // dio.options.headers['Authorization'] = 'Bearer ${state.userModel.access}';
     dio.options.headers['content-Type'] = 'application/json';
-    // final isCached = await apiCacheManager.isAPICacheKeyExist(userCache);
-    // if (isCached) {
-    //   return dio.get(Urls.profileUrl, queryParameters: {'id': 1});
-    // } else {}
-    final response =
-        await dio.get(Urls.albumsUrl, queryParameters: {'userId': 1});
-    state.getAlbumData(response.data);
+    final sharedPref = await SharedPreferences.getInstance();
+    final albumResponse = sharedPref.getString('albums');
+    if (albumResponse != null) {
+      state.getAlbumData(jsonDecode(albumResponse));
+    } else {
+      final response =
+          await dio.get(Urls.albumsUrl, queryParameters: {'userId': 1});
+      sharedPref.setString('albums', jsonEncode(response.data));
+
+      state.getAlbumData(response.data);
+    }
   }
 
   Future getPhotos(context, int albumId) async {
     final state = Provider.of<AppProvider>(context, listen: false);
-    // dio.options.headers['Authorization'] = 'Bearer ${state.userModel.access}';
     dio.options.headers['content-Type'] = 'application/json';
-    // final isCached = await apiCacheManager.isAPICacheKeyExist(userCache);
-    // if (isCached) {
-    //   return dio.get(Urls.profileUrl, queryParameters: {'id': 1});
-    // } else {}
+
     state.albumPhotos = [];
-    final response =
-        await dio.get(Urls.photosUrl, queryParameters: {'albumId': albumId});
-    state.getAlbumPhotos(response.data);
+    final sharedPref = await SharedPreferences.getInstance();
+    final photoResponse = sharedPref.getString('albums-$albumId');
+    if (photoResponse != null) {
+      state.getAlbumPhotos(jsonDecode(photoResponse));
+    } else {
+      final response =
+          await dio.get(Urls.photosUrl, queryParameters: {'albumId': albumId});
+      sharedPref.setString('albums-$albumId', jsonEncode(response.data));
+      state.getAlbumPhotos(response.data);
+    }
   }
 
   Future getPosts(context) async {
     final state = Provider.of<AppProvider>(context, listen: false);
-    // dio.options.headers['Authorization'] = 'Bearer ${state.userModel.access}';
     dio.options.headers['content-Type'] = 'application/json';
-    // final isCached = await apiCacheManager.isAPICacheKeyExist(userCache);
-    // if (isCached) {
-    //   return dio.get(Urls.profileUrl, queryParameters: {'id': 1});
-    // } else {}
-    final response =
-        await dio.get(Urls.postsUrl, queryParameters: {'userId': 1});
-    state.getPosts(response.data);
+    final sharedPref = await SharedPreferences.getInstance();
+    final postResponse = sharedPref.getString('posts');
+    if (postResponse != null) {
+      state.getPosts(jsonDecode(postResponse));
+    } else {
+      final response =
+          await dio.get(Urls.postsUrl, queryParameters: {'userId': 1});
+      sharedPref.setString('posts', jsonEncode(response.data));
+      state.getPosts(response.data);
+    }
   }
 
-
-  Future getPostComments(context,int postId) async {
+  Future getPostComments(context, int postId) async {
     final state = Provider.of<AppProvider>(context, listen: false);
-    // dio.options.headers['Authorization'] = 'Bearer ${state.userModel.access}';
     dio.options.headers['content-Type'] = 'application/json';
-    // final isCached = await apiCacheManager.isAPICacheKeyExist(userCache);
-    // if (isCached) {
-    //   return dio.get(Urls.profileUrl, queryParameters: {'id': 1});
-    // } else {}
     state.comments = [];
-    final response =
-        await dio.get(Urls.commentsUrl, queryParameters: {'postId': postId});
-    state.getPostComments(response.data);
+    final sharedPref = await SharedPreferences.getInstance();
+    final commentResponse = sharedPref.getString('comments-$postId');
+    if (commentResponse != null) {
+      state.getPostComments(jsonDecode(commentResponse));
+    } else {
+      final response =
+          await dio.get(Urls.commentsUrl, queryParameters: {'postId': postId});
+      sharedPref.setString('comments-$postId', jsonEncode(response.data));
+      state.getPostComments(response.data);
+    }
   }
-  
 }

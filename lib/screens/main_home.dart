@@ -2,6 +2,7 @@ import 'package:album_app/screens/home_screen.dart';
 import 'package:album_app/screens/my_albums.dart';
 import 'package:album_app/screens/my_posts.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class MainHome extends StatefulWidget {
   const MainHome({super.key});
@@ -14,9 +15,9 @@ class _MainHomeState extends State<MainHome>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _screens = [
-    HomeScreen(),
-    MyAlbums(),
-    MyPosts(),
+    const HomeScreen(),
+    const MyAlbums(),
+    const MyPosts(),
   ];
 
   @override
